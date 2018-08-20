@@ -15,7 +15,7 @@ typedef struct {
     int pid;
     int st;
     int ct;
-}OUTPUT;
+} OUTPUT;
 
 PROCESS process[5]={{0,2,3,0}, {1,3,9,0}, {2,0,6,0}, {3,1,2,0}, {4,5,8,0}};
 OUTPUT output[5];
@@ -187,7 +187,7 @@ int main(int argc, char const *argv[])
     heapSortBurstTime(n);
     printProcesses();
     printf("\n");
-    while(k!=5) {
+    while(k!=4) {
         int i=0;
         for(i=0;i<5;i++) {
             if(process[i].at <= currentTime && !isComplete(process[i].pid)) {
@@ -198,18 +198,21 @@ int main(int argc, char const *argv[])
             }
         }
         printf("\nk is: %d\n", k);
-        printFilter();
+        //printFilter();
         printf("\n");
         heapSortFilter(k);
-        printFilter();
+        //printFilter();
         int last=0;
         int last_time=0;
-        for(i=0;i<k;i++) {
+        int t=0;
+        for(i=t;i<k;i++) {
             output[i].pid = filter[i].pid;
             last_time = filter[i].at > last ? filter[i].at : last;
             output[i].st = last_time;
             output[i].ct = last_time + filter[i].bt;
             last = output[i].ct;
+            currentTime = output[i].ct;
+            t=k;
         }
     }
     printOutput();

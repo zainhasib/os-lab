@@ -5,12 +5,14 @@ int n = 5;
 int k=0;
 int current_time = 0;
 int s=0;
+int last=0;
 
 typedef struct {
     int pid;
     int at;
     int bt;
     int arrived;
+    int complete;
 } PROCESS;
 
 typedef struct {
@@ -20,7 +22,7 @@ typedef struct {
 }OUTPUT;
 
 // Processes 
-PROCESS process[5]={{0,2,3,0}, {1,3,9,0}, {2,0,6,0}, {3,1,2,0}, {4,25,8,0}};
+PROCESS process[5]={{0,2,3,0,0}, {1,3,9,0,0}, {2,0,6,0,0}, {3,1,2,0,0}, {4,7,8,0,0}};
 PROCESS arrived[5];
 
 // Output
@@ -68,45 +70,45 @@ void heapSort(int n) {
     }
 }
 
-void heapifyBurst(int n, int i) {
+void heapifyBurst(PROCESS * filter,int n, int i) {
     int largest = i;  
     int l = 2*i + 1;  
     int r = 2*i + 2;  
  
-    if (l < n && process[l].bt > process[largest].bt)
+    if (l < n && filter[l].bt > filter[largest].bt)
         largest = l;
  
-    if (r < n && process[r].bt > process[largest].bt)
+    if (r < n && filter[r].bt > filter[largest].bt)
         largest = r;
  
     if (largest != i)
     {
         PROCESS temp;
-        temp = process[i];
-        process[i] = process[largest];
-        process[largest] = temp;
+        temp = filter[i];
+        filter[i] = filter[largest];
+        filter[largest] = temp;
         
         heapify(n, largest);
     }
 }
 
-void buildHeapBurst(int n) {
-    for (int i = n / 2 - 1; i >= 0; i--)
-        heapifyBurst(n, i);
+void buildHeapBurst(PROCESS * filter, int n) {
+    for (int i = n / 2 - 1; i >= s; i--)
+        heapifyBurst(filter, n, i);
 }
 
-void heapSortBurst(int n) {
+void heapSortBurst(PROCESS * filter, int n) {
 
-    buildHeapBurst(n);
+    buildHeapBurst(filter, n);
 
-    for (int i=n-1; i>=0; i--)
+    for (int i=n-1; i>=s; i--)
     {
         PROCESS temp;
-        temp = process[0];
-        process[0] = process[i];
-        process[i] = temp;
+        temp = filter[s];
+        filter[s] = filter[i];
+        filter[i] = temp;
 
-        heapifyBurst(i, 0);
+        heapifyBurst(filter, i, s);
     }
 }
 
@@ -130,6 +132,7 @@ void addArrived() {
         if(current_time <= process[p].at && !process[p].arrived) {
             arrived[k] = process[p]; 
             process[p].arrived = 1;
+            arrived[p].arrived = 1;
             k++;
         }
     }
@@ -138,14 +141,26 @@ void addArrived() {
 void addOutput() {
     int p,q;
     int max_time;
-    int last=0;
+    PROCESS filter[5];
+    int y=0;
+    for(p=0;p<k;p++) {
+        if(arrived[p].pid > -1 && !arrived[p].complete) {
+            filter[y] = arrived[p];
+            y++;
+        }
+    }
+    heapSortBurst(filter, y);
     for(p=s;p<k;p++) {
-        output[p].pid = arrived[p].pid;
-        max_time = arrived[p].at > last ? arrived[p].at : last;
-        output[p].st = max_time;
-        output[p].end = max_time + arrived[p].bt;
-        last = current_time = output[p].end;
-        s=k;
+        if(!filter[p].complete) {
+            output[p].pid = filter[p].pid;
+            max_time = filter[p].at > last ? filter[p].at : last;
+            output[p].st = max_time;
+            output[p].end = max_time + filter[p].bt;
+            last = current_time = output[p].end;
+            s=k;
+            filter[p].complete = 1;
+            addArrived();
+        }
     }
 }
 
@@ -163,10 +178,10 @@ int main(int argc, char const *argv[])
 
     while(k!=5) {
         addArrived();
-    
+        //heapSortBurst(k);
         addOutput();
     }
-    
+
     printOutput();
 
     return 0;

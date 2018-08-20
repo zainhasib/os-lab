@@ -7,3 +7,11 @@ int i, last = 0;
         output[i].end = new_time + process[i].bt;
         last = output[i].end;
     }
+
+
+    process[filter[0].pid].complete = 1;
+    output[out].pid = filter[0].pid;
+    int max_time = filter[0].at > last ? filter[0].at : last;
+    output[out].st = max_time;
+    current_time = output[out].end = max_time + filter[0].bt;
+    out++;

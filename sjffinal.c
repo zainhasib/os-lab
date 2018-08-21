@@ -174,10 +174,10 @@ void addArrived() {
 void addOutput() {
     int i,j;
     if(process[filter[0].pid].complete) {
-        printf("Already  Done");
+        //printf("Already  Done");
     }else {
         output[o].pid = filter[0].pid;
-        int max_time = filter[0].at > last_process_end ? filter[0].at : last_process_end;
+        int max_time = filter[0].at >= last_process_end ? filter[0].at : last_process_end;
         output[o].st = max_time;
         output[o].end = max_time + filter[0].bt;
         current_time = output[o].end;

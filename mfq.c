@@ -193,14 +193,14 @@ void execute() {
             o++;
             if(process[id].rt > 0 && process[id].counter == q2.qtime) {
                 process[id].counter = 0;
-                enqueue(process[id], 2);
+                enqueue(process[id], 1);
                 dequeue(3);
             }else if(process[id].rt <= 0){
                 process[id].complete = 1;
                 dequeue(3);
             }
             if(q3.f == -1) {
-                control = 2;
+                control = 1;
             }
             break;
         }

@@ -136,10 +136,6 @@ void execute() {
     switch(control) {
         case 1 : {
             //printf("\n%d %d %d", q1.p[q1.f].pid, q1.f, q1.r);
-            if(q1.f == -1) {
-                printf("a");
-                control = 2;
-            }
             int id = q1.p[q1.f].pid;
             process[id].rt--;
             process[id].counter++;

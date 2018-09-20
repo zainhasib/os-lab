@@ -2,12 +2,19 @@
 #include<stdlib.h>
 
 int n = 5;
+int current_time=0;
+int a=0;
+static int f=0;
+int last_process_end=0;
+int last=0;
+int o=0;
 
 typedef struct {
     int pid;
     int at;
     int bt;
     int rt;
+    int arrived;
     int complete;
 } PROCESS;
 
@@ -18,88 +25,149 @@ typedef struct {
 }OUTPUT;
 
 // Processes 
-PROCESS process[5]={{0,9,4}, {1,0,8}, {2,6,10}, {3,3,4}, {4,4,2}};
+PROCESS process[5]={{0,9,4,4,0,0}, {1,0,8,8,0,0}, {2,6,10,10,0,0}, {3,3,4,4,0,0}, {4,4,2,2,0,0}};
+PROCESS arrived[5], filter[5];
 
 // Output
-OUTPUT output[5];
+OUTPUT output[100] = {{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0}};
 
-void heapify(int n, int i) {
+void heapifyFilter(int n, int i) {
     int largest = i;  
     int l = 2*i + 1;  
     int r = 2*i + 2;  
  
-    if (l < n && process[l].at > process[largest].at)
+    if (l < n && filter[l].rt < filter[largest].rt)
         largest = l;
  
-    if (r < n && process[r].at > process[largest].at)
+    if (r < n && filter[r].rt < filter[largest].rt)
         largest = r;
  
     if (largest != i)
     {
         PROCESS temp;
-        temp = process[i];
-        process[i] = process[largest];
-        process[largest] = temp;
+        temp = filter[i];
+        filter[i] = filter[largest];
+        filter[largest] = temp;
  
-        heapify(n, largest);
+        heapifyFilter(n, largest);
     }
 }
 
-void buildHeap(int n) {
+void buildHeapFilter(int n) {
     for (int i = n / 2 - 1; i >= 0; i--)
-        heapify(n, i);
+        heapifyFilter(n, i);
 }
 
-void heapSort(int n) {
+void addArrived() {
+    int p, q;
+    int arr = 0;
+    int i=0;
+    for(p=0; p<5; p++) {
+        if(current_time >= process[p].at && !process[p].arrived) {
+            process[p].arrived = 1;
+            arrived[a].pid = process[p].pid;
+            arrived[a].at = process[p].at; 
+            arrived[a].bt = process[p].bt; 
+            arrived[a].complete = process[p].complete;  
+            arrived[a].rt = process[p].rt;  
+            a++;
+        }
+    }
+}
 
-    buildHeap(n);
+void resetFilter() {
+    int i=0;
+    for(i=0;i<5;i++) {
+        filter[i].pid = 0;
+        filter[i].at = 0;
+        filter[i].bt = 0;
+    }
+}
 
-    for (int i=n-1; i>=0; i--)
-    {
-        PROCESS temp;
-        temp = process[0];
-        process[0] = process[i];
-        process[i] = temp;
+void setFilter() {
+    int i=0;
+    int p,q;
+    f=0;
+    for(i=0;i<a;i++) {
+        if(!process[arrived[i].pid].complete) {
+            filter[f].pid = arrived[i].pid;
+            filter[f].at = arrived[i].at; 
+            filter[f].bt = arrived[i].bt; 
+            filter[f].complete = arrived[i].complete;  
+            filter[f].rt = arrived[i].rt; 
+            f++;
+        }
+    }
+}
 
-        heapify(i, 0);
+void addOutput() {
+    int i=0,j=0;
+    if(f > 0) {
+        int id = filter[0].pid;
+        process[id].rt--;
+        arrived[id].rt--;
+        filter[id].rt--;
+        output[o].pid = filter[0].pid;
+        output[o].st = current_time;
+        output[o].end = current_time + 1;
+        if(process[id].rt <= 0) {
+            process[id].complete = 1;
+            arrived[id].complete = 1;
+            filter[id].complete = 1;
+        }
+        o++;
+    }
+}
+
+
+int getCompleted() {
+    int i,j;
+    int count=0;
+    for(i=0;i<5;i++) {
+        if(process[i].complete) {
+            count++;
+        }
+    }
+    return count;
+}
+
+void printOutput() {
+    int i=0;
+    printf("Output: \n");
+    for(i=0;i<o;i++) {
+        printf("Process : %d, Start : %d, End : %d\n", output[i].pid, output[i].st, output[i].end);
     }
 }
 
 void printProcesses() {
-    int i = 0;
+    int i=0;
+    printf("Processes: \n");
     for(i=0;i<5;i++) {
-        printf("Process : %d\n", process[i].pid);
+        printf("Process : %d, Start : %d, End : %d\n", process[i].pid, process[i].at, process[i].bt);
     }
 }
 
-void printOutput() {
+void printFilterItem() {
     int i = 0;
-    for(i=0;i<5;i++) {
-        printf("Process : %d , Start : %d, End : %d\n", output[i].pid, output[i].st, output[i].end);
-    }
+    printf("Filter Process : %d , Start : %d, End : %d\n", filter[0].pid, filter[0].at, filter[0].bt);
 }
 
 int main(int argc, char const *argv[])
 {
     printProcesses();
 
-    heapSort(n);
-
     printf("\n");
+    o=0;
+    int r=0;
 
-    printProcesses();
-
-    printf("\n");
-
-    int i, last = 0;
-    int new_time = 0;
-    for(i=0; i<5; i++) {
-        output[i].pid = process[i].pid;
-        new_time = process[i].at > last ? process[i].at : last; 
-        output[i].st = new_time;
-        output[i].end = new_time + process[i].bt;
-        last = output[i].end;
+    while(getCompleted() < 5) {
+        addArrived();
+        setFilter();
+        buildHeapFilter(f);
+        addOutput();
+        current_time++;
     }
+
 
     printOutput();
 

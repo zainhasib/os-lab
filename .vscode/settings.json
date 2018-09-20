@@ -5,5 +5,10 @@
         "**/.hg": true,
         "**/CVS": true,
         "**/.DS_Store": true
+    },
+    "files.associations": {
+        "stdio.h": "c",
+        "cstdio": "c",
+        "stdlib.h": "c"
     }
 }

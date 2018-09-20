@@ -15,3 +15,16 @@ int i, last = 0;
     output[out].st = max_time;
     current_time = output[out].end = max_time + filter[0].bt;
     out++;
+
+
+        for(i=0;i<5;i++) {
+            if(process[i].processing && process[i].pid == filter[0].pid) {
+                for(i=0;i<o;i++) {
+                    if(filter[0].pid == output[i].pid) {
+                        e=i;
+                    }
+                }
+            }else {
+                e=o;
+            }
+        }

@@ -195,6 +195,7 @@ void execute() {
                 process[id].counter = 0;
                 enqueue(process[id], 1);
                 dequeue(3);
+                control = 1;
             }else if(process[id].rt <= 0){
                 process[id].complete = 1;
                 dequeue(3);
